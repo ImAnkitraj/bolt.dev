@@ -16,17 +16,8 @@ app.use(express.json());
 
 app.post("/template", async (req, res) => {
   const prompt = req.body.prompt;
-  console.log(prompt);
   const result = await model.generateContent({
     contents: [
-      {
-        role: "model",
-        parts: [
-          {
-            text: "Return Either node or react based on what do you think this project should be. Only return a single word wither 'react' or 'node'. Do not return both or anything else.",
-          },
-        ],
-      },
       {
         role: "user",
         parts: [
@@ -36,6 +27,8 @@ app.post("/template", async (req, res) => {
         ],
       },
     ],
+    systemInstruction:
+      "Return Either node or react based on what do you think this project should be. Only return a single word wither 'react' or 'node'. Do not return both or anything else.",
   });
 
   const answer = result?.response?.text().trim();
@@ -63,9 +56,16 @@ app.post("/template", async (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log("Server started at 3000");
+app.post("/chat", async (req, res) => {
+  const messages = req.body.messages;
+  const result = await model.generateContent({
+    contents: messages,
+    systemInstruction: getSystemPrompt(),
+  });
+  console.log(result.response.text());
 });
+
+app.listen(3000, () => console.log("Server started at 3000"));
 
 // const funStream = async () => {
 //   const result = await model.generateContentStream({
